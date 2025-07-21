@@ -11,22 +11,33 @@ class GeminiService {
   async processImage(imageBuffer, mimeType) {
     try {
       const prompt = `
-        Analyze this image and extract any expense-related information. Look for:
-        1. Amount/price (numbers with currency symbols)
+        Analyze this image and extract any expense-related information. The text can be in English or Indonesian language. Look for:
+        1. Amount/price (numbers with currency symbols like Rp, $, or format like "15rb", "25k")
         2. Description of items or services
         3. Date (if visible)
         4. Merchant/store name
         5. Category (food, transport, shopping, etc.)
 
+        For Indonesian receipts, understand common patterns:
+        - Currency: "Rp", "rupiah", "ribu" (thousand), "rb", "k" (thousand)
+        - Common items: "nasi", "ayam", "kopi", "teh", "air", "es", "goreng", "bakar"
+        - Merchants: Indonesian restaurant names, "warung", "resto", "cafe"
+        - Transport: "ojek", "gojek", "grab", "parkir", "tol"
+
         Return the information in this JSON format:
         {
-          "amount": "extracted amount as number (without currency symbol)",
-          "description": "brief description of the expense",
+          "amount": "extracted amount as number (without currency symbol, convert thousands if needed)",
+          "description": "brief description of the expense in English",
           "category": "suggested category (Food, Transport, Entertainment, Shopping, Bills, Health, Education, Other)",
           "date": "date if found (YYYY-MM-DD format) or null",
           "merchant": "store/merchant name if visible",
           "raw_text": "all text found in the image"
         }
+
+        Important notes:
+        - Convert Indonesian numbers: "15rb" = 15000, "25k" = 25000, "2.5k" = 2500
+        - Translate Indonesian descriptions to English for consistency
+        - Recognize Indonesian currency formats: "Rp 15.000" = 15000
 
         If no expense information is found, return:
         {
@@ -79,15 +90,23 @@ class GeminiService {
   async processText(text) {
     try {
       const prompt = `
-        Analyze this text and extract expense information. The text might be:
-        1. A description of an expense (e.g., "Bought coffee for $5")
+        Analyze this text and extract expense information. The text can be in English or Indonesian language. The text might be:
+        1. A description of an expense (e.g., "Bought coffee for $5", "Beli kopi 15000", "Makan siang 25rb")
         2. A receipt or bill text
         3. A simple expense note
 
+        For Indonesian text, understand common patterns:
+        - Currency: "Rp", "rupiah", "ribu" (thousand), "rb", "k" (thousand)
+        - Food terms: "makan", "minum", "kopi", "nasi", "ayam", "soto", "bakso", etc.
+        - Transport: "ojek", "gojek", "grab", "busway", "kereta", "bensin", "parkir"
+        - Shopping: "beli", "belanja", "shopping", "baju", "sepatu"
+        - Bills: "listrik", "air", "internet", "pulsa", "token"
+        - Entertainment: "nonton", "bioskop", "game", "karaoke"
+
         Extract the following information and return in JSON format:
         {
-          "amount": "extracted amount as number (without currency symbol)",
-          "description": "brief description of the expense",
+          "amount": "extracted amount as number (without currency symbol, convert thousands if needed)",
+          "description": "brief description of the expense in English",
           "category": "suggested category (Food, Transport, Entertainment, Shopping, Bills, Health, Education, Other)",
           "date": "date if found (YYYY-MM-DD format) or null",
           "merchant": "store/merchant name if mentioned"
@@ -95,7 +114,11 @@ class GeminiService {
 
         Text to analyze: "${text}"
 
-        If no clear expense information is found, try to categorize the text and suggest a reasonable category.
+        Important notes:
+        - Convert Indonesian numbers: "15rb" = 15000, "25k" = 25000, "2.5k" = 2500
+        - Translate Indonesian descriptions to English for consistency
+        - Recognize Indonesian currency formats and amounts
+        - If no clear expense information is found, try to categorize the text and suggest a reasonable category.
       `;
 
       const result = await this.model.generateContent(prompt);

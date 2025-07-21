@@ -31,25 +31,30 @@ bot.start(async (ctx) => {
   await db.createUser(user.id, user.username, user.first_name);
   
   const welcomeMessage = `
-🎉 Welcome to Expense Tracker Bot!
+🎉 Selamat datang di Expense Tracker Bot! / Welcome to Expense Tracker Bot!
 
+Saya dapat membantu Anda melacak pengeluaran bulanan dengan beberapa cara:
 I can help you track your monthly expenses in several ways:
 
-📝 *Text Input:* Just send me a message like "Coffee $5" or "Bus ticket 2.50"
+📝 *Input Teks / Text Input:* 
+• Bahasa Indonesia: "Kopi 15rb", "Makan siang 25000", "Ojek 10k"
+• English: "Coffee $5", "Bus ticket 2.50"
 
-📸 *Image Input:* Send me photos of receipts, bills, or price tags and I'll extract the expense information automatically
+📸 *Input Gambar / Image Input:* 
+Kirim foto struk, bon, atau label harga dan saya akan mengekstrak informasi pengeluaran secara otomatis
+Send photos of receipts, bills, or price tags and I'll extract expense information automatically
 
-📊 *Reports:* Get detailed monthly reports and analytics
+📊 *Laporan / Reports:* Dapatkan laporan bulanan yang detail dan analitik
+Get detailed monthly reports and analytics
 
-*Available Commands:*
-/help - Show this help message
-/report - Get current month's report
-/expenses - View recent expenses
-/categories - View expense categories
-/total - Get monthly total
-/settings - Bot settings
+*Perintah yang Tersedia / Available Commands:*
+/help - Tampilkan pesan bantuan / Show help message
+/report - Laporan bulan ini / Current month's report  
+/expenses - Lihat pengeluaran terbaru / View recent expenses
+/categories - Lihat kategori / View categories
+/total - Total bulanan / Monthly total
 
-Just start sending me your expenses! 💰
+Mulai kirim pengeluaran Anda! / Just start sending me your expenses! 💰
   `;
   
   ctx.reply(welcomeMessage, { parse_mode: 'Markdown' });
@@ -57,34 +62,44 @@ Just start sending me your expenses! 💰
 
 bot.help((ctx) => {
   const helpMessage = `
-🤖 *Expense Tracker Bot Help*
+🤖 *Bantuan Expense Tracker Bot / Bot Help*
 
-*How to add expenses:*
+*Cara menambah pengeluaran / How to add expenses:*
 
-1️⃣ *Text Format:*
+1️⃣ *Format Teks / Text Format:*
+   🇮🇩 Bahasa Indonesia:
+   • "Kopi 15rb" atau "Kopi 15000"
+   • "Makan siang di KFC 35k"
+   • "Ojek 12000", "Bensin 50rb"
+   • "Belanja baju 150k"
+   
+   🇺🇸 English:
    • "Coffee 5" or "Coffee $5"
    • "Lunch at McDonald's 12.50"
    • "Bus ticket 2"
 
-2️⃣ *Image Upload:*
-   • Send photos of receipts
-   • Send photos of price tags
-   • Send screenshots of digital receipts
+2️⃣ *Upload Gambar / Image Upload:*
+   • Kirim foto struk belanja / Send photos of receipts
+   • Foto label harga / Photos of price tags
+   • Screenshot struk digital / Screenshots of digital receipts
 
-*Commands:*
-/report - Monthly expense report
-/expenses - View recent expenses (last 10)
-/total - Current month total
-/categories - Available categories
-/settings - Bot preferences
+*Perintah / Commands:*
+/report - Laporan pengeluaran bulanan / Monthly expense report
+/expenses - Lihat pengeluaran terbaru (10 terakhir) / View recent expenses (last 10)
+/total - Total bulan ini / Current month total
+/categories - Kategori yang tersedia / Available categories
 
 *Tips:*
-• I automatically detect categories from your expenses
-• Images are processed using AI for accurate extraction
-• All data is stored securely
-• You can edit expenses through the web dashboard
+• Saya otomatis mendeteksi kategori dari pengeluaran Anda
+  I automatically detect categories from your expenses
+• Gambar diproses menggunakan AI untuk ekstraksi yang akurat
+  Images are processed using AI for accurate extraction
+• Semua data disimpan dengan aman
+  All data is stored securely
+• Anda dapat mengedit pengeluaran melalui dashboard web
+  You can edit expenses through the web dashboard
 
-Need more help? Just ask! 😊
+Butuh bantuan lebih? Tanya saja! / Need more help? Just ask! 😊
   `;
   
   ctx.reply(helpMessage, { parse_mode: 'Markdown' });
@@ -110,7 +125,10 @@ bot.on('text', async (ctx) => {
         ctx.chat.id,
         processingMsg.message_id,
         null,
-        '❌ Could not detect an amount in your message. Please include the price.\n\nExample: "Coffee $5" or "Lunch 12.50"'
+        '❌ Tidak dapat mendeteksi jumlah dalam pesan Anda. Mohon sertakan harga.\n\n' +
+        'Contoh / Example:\n' +
+        '🇮🇩 "Kopi 15rb", "Makan siang 25000"\n' +
+        '🇺🇸 "Coffee $5", "Lunch 12.50"'
       );
       return;
     }
@@ -129,19 +147,19 @@ bot.on('text', async (ctx) => {
     
     // Create confirmation message with inline keyboard
     const confirmationMessage = `
-✅ *Expense Added Successfully!*
+✅ *Pengeluaran Berhasil Ditambahkan! / Expense Added Successfully!*
 
-💰 Amount: $${parseFloat(processedData.amount).toFixed(2)}
-📝 Description: ${processedData.description || text}
-🏷️ Category: ${processedData.category || 'Other'}
-📅 Date: ${processedData.date || new Date().toLocaleDateString()}
+💰 Jumlah / Amount: Rp ${parseFloat(processedData.amount).toLocaleString('id-ID')}
+📝 Deskripsi / Description: ${processedData.description || text}
+🏷️ Kategori / Category: ${processedData.category || 'Other'}
+📅 Tanggal / Date: ${processedData.date || new Date().toLocaleDateString()}
     `;
     
-    const keyboard = Markup.inlineKeyboard([
-      [Markup.button.callback('📊 View Report', 'report')],
-      [Markup.button.callback('📋 Recent Expenses', 'expenses')],
-      [Markup.button.callback('💯 Monthly Total', 'total')]
-    ]);
+          const keyboard = Markup.inlineKeyboard([
+        [Markup.button.callback('📊 Lihat Laporan / View Report', 'report')],
+        [Markup.button.callback('📋 Pengeluaran Terbaru / Recent Expenses', 'expenses')],
+        [Markup.button.callback('💯 Total Bulanan / Monthly Total', 'total')]
+      ]);
     
     await ctx.telegram.editMessageText(
       ctx.chat.id,
@@ -204,20 +222,20 @@ bot.on('photo', async (ctx) => {
     
     // Create confirmation message
     const confirmationMessage = `
-✅ *Expense Extracted from Image!*
+✅ *Pengeluaran Berhasil Diekstrak dari Gambar! / Expense Extracted from Image!*
 
-💰 Amount: $${parseFloat(processedData.amount).toFixed(2)}
-📝 Description: ${processedData.description || 'Expense from image'}
-🏷️ Category: ${processedData.category || 'Other'}
-🏪 Merchant: ${processedData.merchant || 'Not detected'}
-📅 Date: ${processedData.date || new Date().toLocaleDateString()}
+💰 Jumlah / Amount: Rp ${parseFloat(processedData.amount).toLocaleString('id-ID')}
+📝 Deskripsi / Description: ${processedData.description || 'Expense from image'}
+🏷️ Kategori / Category: ${processedData.category || 'Other'}
+🏪 Merchant: ${processedData.merchant || 'Tidak terdeteksi / Not detected'}
+📅 Tanggal / Date: ${processedData.date || new Date().toLocaleDateString()}
 
-📋 Raw text: ${processedData.raw_text ? processedData.raw_text.substring(0, 100) + '...' : 'None'}
+📋 Teks mentah / Raw text: ${processedData.raw_text ? processedData.raw_text.substring(0, 100) + '...' : 'None'}
     `;
     
     const keyboard = Markup.inlineKeyboard([
-      [Markup.button.callback('📊 View Report', 'report')],
-      [Markup.button.callback('📋 Recent Expenses', 'expenses')]
+      [Markup.button.callback('📊 Lihat Laporan / View Report', 'report')],
+      [Markup.button.callback('📋 Pengeluaran Terbaru / Recent Expenses', 'expenses')]
     ]);
     
     await ctx.telegram.editMessageText(
@@ -247,24 +265,24 @@ bot.command('report', async (ctx) => {
     const total = await db.getTotalExpenses(userId, year, month);
     
     if (expenses.length === 0) {
-      ctx.reply('📊 No expenses recorded for this month yet. Start adding some expenses!');
+      ctx.reply('📊 Belum ada pengeluaran tercatat untuk bulan ini. Mulai tambahkan pengeluaran!\n\n📊 No expenses recorded for this month yet. Start adding some expenses!');
       return;
     }
     
-    let reportMessage = `📊 *Monthly Report - ${now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}*\n\n`;
-    reportMessage += `💰 *Total Spent:* $${parseFloat(total).toFixed(2)}\n`;
-    reportMessage += `📝 *Total Transactions:* ${expenses.length}\n\n`;
-    reportMessage += `*Breakdown by Category:*\n`;
+    let reportMessage = `📊 *Laporan Bulanan / Monthly Report - ${now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}*\n\n`;
+    reportMessage += `💰 *Total Pengeluaran / Total Spent:* Rp ${parseFloat(total).toLocaleString('id-ID')}\n`;
+    reportMessage += `📝 *Total Transaksi / Total Transactions:* ${expenses.length}\n\n`;
+    reportMessage += `*Rincian per Kategori / Breakdown by Category:*\n`;
     
     monthlyReport.forEach(category => {
       const percentage = ((category.total / total) * 100).toFixed(1);
-      reportMessage += `• ${category.category}: $${parseFloat(category.total).toFixed(2)} (${percentage}%)\n`;
+      reportMessage += `• ${category.category}: Rp ${parseFloat(category.total).toLocaleString('id-ID')} (${percentage}%)\n`;
     });
     
     // Generate AI insights
     try {
       const insights = await geminiService.generateMonthlyReport(expenses);
-      reportMessage += `\n🤖 *AI Insights:*\n${insights.substring(0, 500)}...`;
+      reportMessage += `\n🤖 *Wawasan AI / AI Insights:*\n${insights.substring(0, 500)}...`;
     } catch (error) {
       console.error('Error generating AI insights:', error);
     }

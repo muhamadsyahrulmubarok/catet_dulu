@@ -5,12 +5,13 @@ A comprehensive expense tracking system with a Telegram bot, AI-powered OCR usin
 ## Features
 
 ### 🤖 Telegram Bot
-- **Text Input**: Send expenses like "Coffee $5" or "Lunch 12.50"
+- **Bilingual Support**: English and Indonesian language input
+- **Text Input**: Send expenses like "Coffee $5", "Kopi 15rb", or "Makan siang 25k"
 - **Image OCR**: Upload receipt photos for automatic expense extraction
-- **AI Processing**: Gemini 2.5 Flash analyzes text and images
-- **Smart Categorization**: Automatic expense categorization
-- **Monthly Reports**: Detailed spending analytics
-- **Interactive Commands**: Easy-to-use bot interface
+- **AI Processing**: Gemini 2.5 Flash analyzes text and images in both languages
+- **Smart Categorization**: Automatic expense categorization with Indonesian keywords
+- **Monthly Reports**: Detailed spending analytics with bilingual interface
+- **Interactive Commands**: Easy-to-use bot interface in both languages
 
 ### 📊 Web Dashboard
 - **Real-time Analytics**: Comprehensive expense insights
@@ -185,6 +186,36 @@ railway add postgresql
 railway up
 ```
 
+## Indonesian Language Support
+
+The bot fully supports Indonesian language input with intelligent processing:
+
+### Supported Features
+- **Number Formats**: "15rb", "25k", "2.5k", "Rp 15.000", "50ribu"
+- **Food Terms**: makan, minum, kopi, nasi, ayam, soto, bakso, warteg, padang
+- **Transport**: ojek, gojek, grab, busway, kereta, bensin, parkir, tol
+- **Shopping**: beli, belanja, baju, sepatu, mall, toko, minimarket
+- **Bills**: listrik, air, internet, pulsa, token, tagihan, pembayaran
+- **Entertainment**: nonton, bioskop, karaoke, gym, spa, wisata, hotel
+
+### Example Usage
+```
+User: "Kopi 15rb di Starbucks"
+Bot: ✅ Expense Added! Coffee - Rp 15,000 (Food category)
+
+User: "Ojek grab 12k"
+Bot: ✅ Expense Added! Grab ride - Rp 12,000 (Transport category)
+
+User: "Belanja baju 150ribu"
+Bot: ✅ Expense Added! Shopping clothes - Rp 150,000 (Shopping category)
+```
+
+### AI Processing
+- Gemini 2.5 Flash understands Indonesian context and slang
+- Automatic translation of descriptions to English for consistency
+- Smart categorization based on Indonesian keywords
+- OCR processing of Indonesian receipts and bills
+
 ## Configuration
 
 ### Telegram Bot Setup
@@ -231,16 +262,32 @@ DB_PASSWORD=your_password
 
 ### Adding Expenses
 
-**Text Format:**
+**Text Format (English):**
 - "Coffee 5"
 - "Lunch at McDonald's 12.50"
 - "Bus ticket $2"
 - "Groceries 45.30 food"
 
+**Format Teks (Bahasa Indonesia):**
+- "Kopi 15rb" atau "Kopi 15000"
+- "Makan siang di KFC 35k"
+- "Ojek 12000", "Bensin 50rb"
+- "Belanja baju 150k"
+- "Listrik 200ribu"
+- "Parkir 5000"
+
+**Supported Indonesian Number Formats:**
+- "15rb" = 15,000
+- "25k" = 25,000
+- "2.5k" = 2,500
+- "Rp 15.000" = 15,000
+- "50ribu" = 50,000
+
 **Image Upload:**
-- Send photos of receipts
+- Send photos of receipts (English/Indonesian)
 - Upload price tags
 - Share digital receipt screenshots
+- Indonesian receipts are automatically processed
 
 ### Web Dashboard
 
