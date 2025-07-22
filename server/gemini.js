@@ -1,16 +1,16 @@
-const { GoogleGenerativeAI } = require('@google/generative-ai');
-require('dotenv').config();
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+require("dotenv").config();
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 class GeminiService {
-  constructor() {
-    this.model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
-  }
+	constructor() {
+		this.model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+	}
 
-  async processImage(imageBuffer, mimeType) {
-    try {
-      const prompt = `
+	async processImage(imageBuffer, mimeType) {
+		try {
+			const prompt = `
         Analyze this image and extract any expense-related information. The text can be in English or Indonesian language. Look for:
         1. Amount/price (numbers with currency symbols like Rp, $, or format like "15rb", "25k")
         2. Description of items or services
@@ -50,46 +50,45 @@ class GeminiService {
         }
       `;
 
-      const imagePart = {
-        inlineData: {
-          data: imageBuffer.toString('base64'),
-          mimeType: mimeType
-        }
-      };
+			const imagePart = {
+				inlineData: {
+					data: imageBuffer.toString("base64"),
+					mimeType: mimeType,
+				},
+			};
 
-      const result = await this.model.generateContent([prompt, imagePart]);
-      const response = await result.response;
-      const text = response.text();
+			const result = await this.model.generateContent([prompt, imagePart]);
+			const response = await result.response;
+			const text = response.text();
 
-      // Try to parse JSON response
-      try {
-        const jsonMatch = text.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-          return JSON.parse(jsonMatch[0]);
-        }
-      } catch (parseError) {
-        console.error('Error parsing Gemini JSON response:', parseError);
-      }
+			// Try to parse JSON response
+			try {
+				const jsonMatch = text.match(/\{[\s\S]*\}/);
+				if (jsonMatch) {
+					return JSON.parse(jsonMatch[0]);
+				}
+			} catch (parseError) {
+				console.error("Error parsing Gemini JSON response:", parseError);
+			}
 
-      // Fallback if JSON parsing fails
-      return {
-        amount: null,
-        description: "Could not process image",
-        category: "Other",
-        date: null,
-        merchant: null,
-        raw_text: text
-      };
+			// Fallback if JSON parsing fails
+			return {
+				amount: null,
+				description: "Could not process image",
+				category: "Other",
+				date: null,
+				merchant: null,
+				raw_text: text,
+			};
+		} catch (error) {
+			console.error("Error processing image with Gemini:", error);
+			throw new Error("Failed to process image");
+		}
+	}
 
-    } catch (error) {
-      console.error('Error processing image with Gemini:', error);
-      throw new Error('Failed to process image');
-    }
-  }
-
-  async processText(text) {
-    try {
-      const prompt = `
+	async processText(text) {
+		try {
+			const prompt = `
         Analyze this text and extract expense information. The text can be in English or Indonesian language. The text might be:
         1. A description of an expense (e.g., "Bought coffee for $5", "Beli kopi 15000", "Makan siang 25rb")
         2. A receipt or bill text
@@ -121,45 +120,44 @@ class GeminiService {
         - If no clear expense information is found, try to categorize the text and suggest a reasonable category.
       `;
 
-      const result = await this.model.generateContent(prompt);
-      const response = await result.response;
-      const responseText = response.text();
+			const result = await this.model.generateContent(prompt);
+			const response = await result.response;
+			const responseText = response.text();
 
-      // Try to parse JSON response
-      try {
-        const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-          return JSON.parse(jsonMatch[0]);
-        }
-      } catch (parseError) {
-        console.error('Error parsing Gemini JSON response:', parseError);
-      }
+			// Try to parse JSON response
+			try {
+				const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+				if (jsonMatch) {
+					return JSON.parse(jsonMatch[0]);
+				}
+			} catch (parseError) {
+				console.error("Error parsing Gemini JSON response:", parseError);
+			}
 
-      // Fallback if JSON parsing fails
-      return {
-        amount: null,
-        description: text,
-        category: "Other",
-        date: null,
-        merchant: null
-      };
+			// Fallback if JSON parsing fails
+			return {
+				amount: null,
+				description: text,
+				category: "Other",
+				date: null,
+				merchant: null,
+			};
+		} catch (error) {
+			console.error("Error processing text with Gemini:", error);
+			throw new Error("Failed to process text");
+		}
+	}
 
-    } catch (error) {
-      console.error('Error processing text with Gemini:', error);
-      throw new Error('Failed to process text');
-    }
-  }
+	async generateMonthlyReport(expenses) {
+		try {
+			const expenseData = expenses.map((exp) => ({
+				amount: exp.amount,
+				category: exp.category,
+				description: exp.description,
+				date: exp.date,
+			}));
 
-  async generateMonthlyReport(expenses) {
-    try {
-      const expenseData = expenses.map(exp => ({
-        amount: exp.amount,
-        category: exp.category,
-        description: exp.description,
-        date: exp.date
-      }));
-
-      const prompt = `
+			const prompt = `
         Generate a comprehensive monthly expense report based on this data:
         ${JSON.stringify(expenseData, null, 2)}
 
@@ -173,15 +171,14 @@ class GeminiService {
         Format the response as a readable report, not JSON.
       `;
 
-      const result = await this.model.generateContent(prompt);
-      const response = await result.response;
-      return response.text();
-
-    } catch (error) {
-      console.error('Error generating report with Gemini:', error);
-      throw new Error('Failed to generate report');
-    }
-  }
+			const result = await this.model.generateContent(prompt);
+			const response = await result.response;
+			return response.text();
+		} catch (error) {
+			console.error("Error generating report with Gemini:", error);
+			throw new Error("Failed to generate report");
+		}
+	}
 }
 
 module.exports = new GeminiService();
